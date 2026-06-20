@@ -227,30 +227,37 @@ class ConstructionPlan(db.Model):
     """施工图计划表"""
     __tablename__ = 'construction_plans'
     id = db.Column(db.Integer, primary_key=True)
-    project_name = db.Column(db.String(200), nullable=False)
-    project_manager = db.Column(db.String(50))  # 项目负责人（移动到项目名称后）
-    unit_project = db.Column(db.String(200))
-    drawing_content = db.Column(db.String(500))  # 成品套图（原单位工程下专业图纸内容）
-    designer = db.Column(db.String(50))
-    major = db.Column(db.String(50))  # 专业（原专业类别）
+    month = db.Column(db.String(10))  # 月份
+    department = db.Column(db.String(100))  # 所属单位
+    project_name = db.Column(db.String(200), nullable=False)  # 项目名称
+    project_manager = db.Column(db.String(50))  # 项目负责人
+    design_phase = db.Column(db.String(50))  # 设计阶段
+    unit_project = db.Column(db.String(200))  # 单位工程名称
+    drawing_content = db.Column(db.String(500))  # 成品套图/文件名称
+    designer = db.Column(db.String(50))  # 设计人员
+    major = db.Column(db.String(50))  # 专业
     major_director = db.Column(db.String(50))  # 专业所长
     estimated_quantitative = db.Column(db.String(100))  # 预估量化指标
     a1_drawing_count = db.Column(db.String(50))  # 折合A1图纸张数
+    manual_page_count = db.Column(db.String(50))  # 说明书页数
     plan_completion_percent = db.Column(db.String(20))  # 计划完成百分比
     plan_work_days = db.Column(db.Integer)  # 计划工作日
     start_date = db.Column(db.String(20))  # 计划开始时间
     end_date = db.Column(db.String(20))  # 计划完成时间
     monthly_deviation = db.Column(db.String(50))  # 上月滚动偏差
     completion_status = db.Column(db.String(20))  # 完成情况
-    remarks = db.Column(db.String(500))
+    remarks = db.Column(db.String(500))  # 备注
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     def to_dict(self):
         return {
             'id': self.id,
+            'month': _normalize_month(self.month),
+            'department': self.department,
             'projectName': self.project_name,
             'projectManager': self.project_manager,
+            'designPhase': self.design_phase,
             'unitProject': self.unit_project,
             'drawingContent': self.drawing_content,
             'designer': self.designer,
@@ -258,6 +265,7 @@ class ConstructionPlan(db.Model):
             'majorDirector': self.major_director,
             'estimatedQuantitative': self.estimated_quantitative,
             'a1DrawingCount': self.a1_drawing_count,
+            'manualPageCount': self.manual_page_count,
             'planCompletionPercent': self.plan_completion_percent,
             'planWorkDays': self.plan_work_days,
             'startDate': self.start_date,
@@ -273,10 +281,12 @@ class PhasePlan(db.Model):
     """阶段设计计划表"""
     __tablename__ = 'phase_plans'
     id = db.Column(db.Integer, primary_key=True)
+    month = db.Column(db.String(10))  # 月份
+    department = db.Column(db.String(100))  # 所属单位
     project_name = db.Column(db.String(200), nullable=False)
     project_manager = db.Column(db.String(50))
     design_phase = db.Column(db.String(50))
-    product_drawing_name = db.Column(db.String(200))
+    product_drawing_name = db.Column(db.String(200))  # 成品套图/文件名称
     designer = db.Column(db.String(50))
     major = db.Column(db.String(200))
     major_director = db.Column(db.String(50))
@@ -285,8 +295,8 @@ class PhasePlan(db.Model):
     manual_page_count = db.Column(db.String(50))
     plan_completion_percent = db.Column(db.String(20))
     plan_work_days = db.Column(db.Integer)
-    plan_start_date = db.Column(db.String(20))
-    plan_end_date = db.Column(db.String(20))
+    start_date = db.Column(db.String(20))  # 计划开始时间
+    end_date = db.Column(db.String(20))  # 计划完成时间
     monthly_deviation = db.Column(db.String(50))
     remarks = db.Column(db.String(500))
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -295,6 +305,8 @@ class PhasePlan(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
+            'month': self.month,
+            'department': self.department,
             'projectName': self.project_name,
             'projectManager': self.project_manager,
             'designPhase': self.design_phase,
@@ -307,8 +319,8 @@ class PhasePlan(db.Model):
             'manualPageCount': self.manual_page_count,
             'planCompletionPercent': self.plan_completion_percent,
             'planWorkDays': self.plan_work_days if self.plan_work_days else '',
-            'planStartDate': self.plan_start_date,
-            'planEndDate': self.plan_end_date,
+            'startDate': self.start_date,
+            'endDate': self.end_date,
             'monthlyDeviation': self.monthly_deviation,
             'remarks': self.remarks,
             'updatedAt': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else ''
@@ -319,10 +331,12 @@ class TechnicalPlan(db.Model):
     """技术要求计划表"""
     __tablename__ = 'technical_plans'
     id = db.Column(db.Integer, primary_key=True)
+    month = db.Column(db.String(10))  # 月份
+    department = db.Column(db.String(100))  # 所属单位
     project_name = db.Column(db.String(200))
     project_manager = db.Column(db.String(50))
     design_phase = db.Column(db.String(50))
-    product_drawing_name = db.Column(db.String(200), nullable=False)
+    product_drawing_name = db.Column(db.String(200), nullable=False)  # 成品套图/文件名称
     designer = db.Column(db.String(50))
     major = db.Column(db.String(200))
     major_director = db.Column(db.String(50))
@@ -331,8 +345,8 @@ class TechnicalPlan(db.Model):
     manual_page_count = db.Column(db.String(50))
     plan_completion_percent = db.Column(db.String(20))
     plan_work_days = db.Column(db.Integer)
-    plan_start_date = db.Column(db.String(20))
-    plan_end_date = db.Column(db.String(20))
+    start_date = db.Column(db.String(20))  # 计划开始时间
+    end_date = db.Column(db.String(20))  # 计划完成时间
     monthly_deviation = db.Column(db.String(50))
     remarks = db.Column(db.String(500))
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -341,6 +355,8 @@ class TechnicalPlan(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
+            'month': self.month,
+            'department': self.department,
             'projectName': self.project_name,
             'projectManager': self.project_manager,
             'designPhase': self.design_phase,
@@ -353,8 +369,8 @@ class TechnicalPlan(db.Model):
             'manualPageCount': self.manual_page_count,
             'planCompletionPercent': self.plan_completion_percent,
             'planWorkDays': self.plan_work_days if self.plan_work_days else '',
-            'planStartDate': self.plan_start_date,
-            'planEndDate': self.plan_end_date,
+            'startDate': self.start_date,
+            'endDate': self.end_date,
             'monthlyDeviation': self.monthly_deviation,
             'remarks': self.remarks,
             'updatedAt': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else ''
@@ -392,6 +408,29 @@ class ProjectName(db.Model):
         }
 
 
+def _normalize_month(month_str):
+    """规范化月份格式：强制为'YYYY年MM月'格式"""
+    if not month_str:
+        return month_str
+    import re
+    s = month_str.strip()
+    # 去除时间单位（时、分、秒等）
+    s = re.sub(r'[\s]*[时分秒][\s]*\d*[\s]*$', '', s)
+    patterns = [
+        (r'^(\d{4})[-/年.](\d{1,2})', 'dash'),
+        (r'^(\d{4})(\d{2})$', 'compact'),
+        (r'^(\d{4})年(\d{1,2})月', 'cn'),
+    ]
+    for pattern, fmt in patterns:
+        m = re.match(pattern, s)
+        if m:
+            year = m.group(1)
+            month = int(m.group(2))
+            if 1 <= month <= 12:
+                return f'{year}年{month:02d}月'
+    return month_str
+
+
 class WorkloadStats(db.Model):
     """工作量统计表"""
     __tablename__ = 'workload_stats'
@@ -425,7 +464,7 @@ class WorkloadStats(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'month': self.month,
+            'month': _normalize_month(self.month),
             'department': self.department,
             'name': self.name,
             'major': self.major,
@@ -556,36 +595,41 @@ def init_default_data():
     # Create sample data for construction plans
     if ConstructionPlan.query.count() == 0:
         samples = [
-            ConstructionPlan(project_name='XX污水处理厂扩建工程', unit_project='生化处理车间',
+            ConstructionPlan(month='2026-03', department='XX公司', project_name='XX污水处理厂扩建工程',
+                           project_manager='张工', design_phase='施工图设计',
                            drawing_content='建筑平立剖面图', major='建筑', designer='王工',
                            major_director='王总', estimated_quantitative='建筑专业全套施工图',
-                           a1_drawing_count='120', plan_completion_percent='60%',
-                           plan_work_days=121, completion_status='进行中', start_date='2026-03-01', end_date='2026-06-30',
-                           project_manager='张工', remarks='一期扩建'),
-            ConstructionPlan(project_name='XX污水处理厂扩建工程', unit_project='生化处理车间',
+                           a1_drawing_count='120', manual_page_count='', plan_completion_percent='60%',
+                           plan_work_days=121, start_date='2026-03-01', end_date='2026-06-30',
+                           monthly_deviation='', remarks='一期扩建'),
+            ConstructionPlan(month='2026-04', department='XX公司', project_name='XX污水处理厂扩建工程',
+                           project_manager='张工', design_phase='施工图设计',
                            drawing_content='结构施工图', major='结构', designer='李工',
                            major_director='李总', estimated_quantitative='结构专业全套施工图',
-                           a1_drawing_count='150', plan_completion_percent='30%',
-                           plan_work_days=106, completion_status='未开始', start_date='2026-04-01', end_date='2026-07-15',
-                           project_manager='张工', remarks=''),
-            ConstructionPlan(project_name='XX污水处理厂扩建工程', unit_project='生化处理车间',
+                           a1_drawing_count='150', manual_page_count='', plan_completion_percent='30%',
+                           plan_work_days=106, start_date='2026-04-01', end_date='2026-07-15',
+                           monthly_deviation='', remarks=''),
+            ConstructionPlan(month='2026-02', department='XX公司', project_name='XX污水处理厂扩建工程',
+                           project_manager='张工', design_phase='施工图设计',
                            drawing_content='给排水管线图', major='给排水', designer='赵工',
                            major_director='赵总', estimated_quantitative='给排水专业全套施工图',
-                           a1_drawing_count='80', plan_completion_percent='100%',
-                           plan_work_days=76, completion_status='已完成', start_date='2026-02-15', end_date='2026-05-01',
-                           project_manager='张工', remarks='已完成审查'),
-            ConstructionPlan(project_name='YY热电厂改造项目', unit_project='主厂房',
+                           a1_drawing_count='80', manual_page_count='', plan_completion_percent='100%',
+                           plan_work_days=76, start_date='2026-02-15', end_date='2026-05-01',
+                           monthly_deviation='', remarks='已完成审查'),
+            ConstructionPlan(month='2026-03', department='YY公司', project_name='YY热电厂改造项目',
+                           project_manager='刘工', design_phase='施工图设计',
                            drawing_content='暖通空调施工图', major='暖通', designer='陈工',
                            major_director='陈总', estimated_quantitative='暖通专业全套施工图',
-                           a1_drawing_count='90', plan_completion_percent='45%',
-                           plan_work_days=140, completion_status='进行中', start_date='2026-03-15', end_date='2026-08-01',
-                           project_manager='刘工', remarks='含洁净室设计'),
-            ConstructionPlan(project_name='YY热电厂改造项目', unit_project='主厂房',
+                           a1_drawing_count='90', manual_page_count='', plan_completion_percent='45%',
+                           plan_work_days=140, start_date='2026-03-15', end_date='2026-08-01',
+                           monthly_deviation='', remarks='含洁净室设计'),
+            ConstructionPlan(month='2026-03', department='YY公司', project_name='YY热电厂改造项目',
+                           project_manager='刘工', design_phase='施工图设计',
                            drawing_content='电气施工图', major='电气', designer='孙工',
                            major_director='孙总', estimated_quantitative='电气专业全套施工图',
-                           a1_drawing_count='100', plan_completion_percent='80%',
-                           plan_work_days=106, completion_status='已延期', start_date='2026-03-01', end_date='2026-06-15',
-                           project_manager='刘工', remarks='设备资料延迟'),
+                           a1_drawing_count='100', manual_page_count='', plan_completion_percent='80%',
+                           plan_work_days=106, start_date='2026-03-01', end_date='2026-06-15',
+                           monthly_deviation='3天', remarks='设备资料延迟'),
         ]
         db.session.add_all(samples)
 
@@ -1271,7 +1315,7 @@ def api_get_construction():
     if keyword:
         query = query.filter(db.or_(
             ConstructionPlan.project_name.contains(keyword),
-            ConstructionPlan.unit_project.contains(keyword),
+            ConstructionPlan.department.contains(keyword),
             ConstructionPlan.drawing_content.contains(keyword),
             ConstructionPlan.major.contains(keyword),
             ConstructionPlan.designer.contains(keyword),
@@ -1300,8 +1344,11 @@ def api_create_construction():
             plan_work_days = None
     
     record = ConstructionPlan(
+        month=data.get('month', ''),
+        department=data.get('department', ''),
         project_name=data.get('projectName', ''),
         project_manager=data.get('projectManager', ''),
+        design_phase=data.get('designPhase', ''),
         unit_project=data.get('unitProject', ''),
         drawing_content=data.get('drawingContent', ''),
         designer=data.get('designer', ''),
@@ -1309,6 +1356,7 @@ def api_create_construction():
         major_director=data.get('majorDirector', ''),
         estimated_quantitative=data.get('estimatedQuantitative', ''),
         a1_drawing_count=data.get('a1DrawingCount', ''),
+        manual_page_count=data.get('manualPageCount', ''),
         plan_completion_percent=data.get('planCompletionPercent', ''),
         plan_work_days=plan_work_days,
         start_date=data.get('startDate', ''),
@@ -1335,8 +1383,11 @@ def api_update_construction(record_id):
     if not data:
         return jsonify({'code': 400, 'msg': '请求数据无效'}), 400
 
+    record.month = data.get('month', record.month)
+    record.department = data.get('department', record.department)
     record.project_name = data.get('projectName', record.project_name)
     record.project_manager = data.get('projectManager', record.project_manager)
+    record.design_phase = data.get('designPhase', record.design_phase)
     record.unit_project = data.get('unitProject', record.unit_project)
     record.drawing_content = data.get('drawingContent', record.drawing_content)
     record.designer = data.get('designer', record.designer)
@@ -1344,6 +1395,7 @@ def api_update_construction(record_id):
     record.major_director = data.get('majorDirector', record.major_director)
     record.estimated_quantitative = data.get('estimatedQuantitative', record.estimated_quantitative)
     record.a1_drawing_count = data.get('a1DrawingCount', record.a1_drawing_count)
+    record.manual_page_count = data.get('manualPageCount', record.manual_page_count)
     record.plan_completion_percent = data.get('planCompletionPercent', record.plan_completion_percent)
     record.start_date = data.get('startDate', record.start_date)
     record.end_date = data.get('endDate', record.end_date)
@@ -1410,12 +1462,12 @@ def api_create_phase():
 
     # 计算计划工作日（如果未提供）
     plan_work_days = data.get('planWorkDays')
-    plan_start_date = data.get('planStartDate', '')
-    plan_end_date = data.get('planEndDate', '')
-    if not plan_work_days and plan_start_date and plan_end_date:
+    start_date = data.get('startDate', '')
+    end_date = data.get('endDate', '')
+    if not plan_work_days and start_date and end_date:
         try:
-            start = datetime.strptime(plan_start_date, '%Y-%m-%d')
-            end = datetime.strptime(plan_end_date, '%Y-%m-%d')
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-%d')
             plan_work_days = (end - start).days
         except:
             plan_work_days = None
@@ -1426,6 +1478,8 @@ def api_create_phase():
             plan_work_days = None
 
     record = PhasePlan(
+        month=data.get('month', ''),
+        department=data.get('department', ''),
         project_name=data.get('projectName', ''),
         project_manager=data.get('projectManager', ''),
         design_phase=data.get('designPhase', ''),
@@ -1438,8 +1492,8 @@ def api_create_phase():
         manual_page_count=data.get('manualPageCount', ''),
         plan_completion_percent=data.get('planCompletionPercent', ''),
         plan_work_days=plan_work_days,
-        plan_start_date=plan_start_date,
-        plan_end_date=plan_end_date,
+        start_date=start_date,
+        end_date=end_date,
         monthly_deviation=data.get('monthlyDeviation', ''),
         remarks=data.get('remarks', ''),
         created_by=session.get('user_id')
@@ -1461,6 +1515,8 @@ def api_update_phase(record_id):
     if not data:
         return jsonify({'code': 400, 'msg': '请求数据无效'}), 400
 
+    record.month = data.get('month', record.month)
+    record.department = data.get('department', record.department)
     record.project_name = data.get('projectName', record.project_name)
     record.project_manager = data.get('projectManager', record.project_manager)
     record.design_phase = data.get('designPhase', record.design_phase)
@@ -1475,21 +1531,21 @@ def api_update_phase(record_id):
 
     # 处理计划工作日
     plan_work_days = data.get('planWorkDays')
-    plan_start_date = data.get('planStartDate', record.plan_start_date)
-    plan_end_date = data.get('planEndDate', record.plan_end_date)
-    if plan_start_date:
-        record.plan_start_date = plan_start_date
-    if plan_end_date:
-        record.plan_end_date = plan_end_date
+    start_date = data.get('startDate', record.start_date)
+    end_date = data.get('endDate', record.end_date)
+    if start_date:
+        record.start_date = start_date
+    if end_date:
+        record.end_date = end_date
     if plan_work_days:
         try:
             record.plan_work_days = int(plan_work_days)
         except:
             record.plan_work_days = None
-    elif plan_start_date and plan_end_date:
+    elif start_date and end_date:
         try:
-            start = datetime.strptime(plan_start_date, '%Y-%m-%d')
-            end = datetime.strptime(plan_end_date, '%Y-%m-%d')
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-%d')
             record.plan_work_days = (end - start).days
         except:
             pass
@@ -1545,12 +1601,12 @@ def api_create_technical():
 
     # 计算计划工作日（如果未提供）
     plan_work_days = data.get('planWorkDays')
-    plan_start_date = data.get('planStartDate', '')
-    plan_end_date = data.get('planEndDate', '')
-    if not plan_work_days and plan_start_date and plan_end_date:
+    start_date = data.get('startDate', '')
+    end_date = data.get('endDate', '')
+    if not plan_work_days and start_date and end_date:
         try:
-            start = datetime.strptime(plan_start_date, '%Y-%m-%d')
-            end = datetime.strptime(plan_end_date, '%Y-%m-%d')
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-%d')
             plan_work_days = (end - start).days
         except:
             plan_work_days = None
@@ -1561,6 +1617,8 @@ def api_create_technical():
             plan_work_days = None
 
     record = TechnicalPlan(
+        month=data.get('month', ''),
+        department=data.get('department', ''),
         project_name=data.get('projectName', ''),
         project_manager=data.get('projectManager', ''),
         design_phase=data.get('designPhase', ''),
@@ -1573,8 +1631,8 @@ def api_create_technical():
         manual_page_count=data.get('manualPageCount', ''),
         plan_completion_percent=data.get('planCompletionPercent', ''),
         plan_work_days=plan_work_days,
-        plan_start_date=plan_start_date,
-        plan_end_date=plan_end_date,
+        start_date=start_date,
+        end_date=end_date,
         monthly_deviation=data.get('monthlyDeviation', ''),
         remarks=data.get('remarks', ''),
         created_by=session.get('user_id')
@@ -1596,6 +1654,8 @@ def api_update_technical(record_id):
     if not data:
         return jsonify({'code': 400, 'msg': '请求数据无效'}), 400
 
+    record.month = data.get('month', record.month)
+    record.department = data.get('department', record.department)
     record.project_name = data.get('projectName', record.project_name)
     record.project_manager = data.get('projectManager', record.project_manager)
     record.design_phase = data.get('designPhase', record.design_phase)
@@ -1610,21 +1670,21 @@ def api_update_technical(record_id):
 
     # 处理计划工作日
     plan_work_days = data.get('planWorkDays')
-    plan_start_date = data.get('planStartDate', record.plan_start_date)
-    plan_end_date = data.get('planEndDate', record.plan_end_date)
-    if plan_start_date:
-        record.plan_start_date = plan_start_date
-    if plan_end_date:
-        record.plan_end_date = plan_end_date
+    start_date = data.get('startDate', record.start_date)
+    end_date = data.get('endDate', record.end_date)
+    if start_date:
+        record.start_date = start_date
+    if end_date:
+        record.end_date = end_date
     if plan_work_days:
         try:
             record.plan_work_days = int(plan_work_days)
         except:
             record.plan_work_days = None
-    elif plan_start_date and plan_end_date:
+    elif start_date and end_date:
         try:
-            start = datetime.strptime(plan_start_date, '%Y-%m-%d')
-            end = datetime.strptime(plan_end_date, '%Y-%m-%d')
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-%d')
             record.plan_work_days = (end - start).days
         except:
             pass
@@ -1661,9 +1721,11 @@ def api_batch_delete_construction():
     query = ConstructionPlan.query
 
     if 'project' in data and data['project']:
-        query = query.filter(ConstructionPlan.project_name == data['project'])
-    if 'unit_project' in data and data['unit_project']:
-        query = query.filter(ConstructionPlan.unit_project == data['unit_project'])
+        query = query.filter(ConstructionPlan.project_name.like(f'%{data["project"]}%'))
+    if 'department' in data and data['department']:
+        query = query.filter(ConstructionPlan.department == data['department'])
+    if 'design_phase' in data and data['design_phase']:
+        query = query.filter(ConstructionPlan.design_phase == data['design_phase'])
     if 'designer' in data and data['designer']:
         query = query.filter(ConstructionPlan.designer == data['designer'])
     if 'major' in data and data['major']:
@@ -1748,18 +1810,18 @@ def api_batch_delete_technical():
 # 表头映射定义
 EXCEL_HEADERS = {
     'construction': [
-        '项目名称', '所属单位', '项目负责人', '单位工程名称', '成品套图',
-        '设计人', '专业', '专业所长', '预估量化指标', '折合A1图纸张数',
+        '月份', '所属单位', '项目名称', '项目负责人', '设计阶段', '单位工程名称', '成品套图/文件名称',
+        '设计人员', '专业', '专业所长', '预估量化指标', '折合A1图纸张数', '说明书页数',
         '计划完成百分比', '计划工作日', '计划开始时间', '计划完成时间',
-        '上月滚动偏差', '完成情况', '备注', '设计阶段'
+        '上月滚动偏差', '完成情况', '备注'
     ],
     'phase': [
-        '项目名称', '项目负责人', '设计阶段', '成品套图/文件名称', '设计人', '专业',
+        '月份', '所属单位', '项目名称', '项目负责人', '设计阶段', '成品套图/文件名称', '设计人', '专业',
         '专业所长', '预估量化指标', '折合A1图纸张数', '说明书页数', '计划完成百分比',
         '计划工作日', '计划开始时间', '计划完成时间', '上月滚动偏差', '备注'
     ],
     'technical': [
-        '项目名称', '项目负责人', '设计阶段', '成品套图/文件名称', '设计人',
+        '月份', '所属单位', '项目名称', '项目负责人', '设计阶段', '成品套图/文件名称', '设计人',
         '专业', '专业所长', '预估量化指标', '折合A1图纸张数', '说明书页数',
         '计划完成百分比', '计划工作日', '计划开始时间', '计划完成时间',
         '上月滚动偏差', '备注'
@@ -1870,17 +1932,17 @@ def api_import_excel(table_type):
             values = [str(cell).strip() if cell is not None else '' for cell in row]
 
             if table_type == 'construction':
-                if not values[0]:
+                if not values[2]:  # 项目名称
                     fail_count += 1
                     fail_rows.append(row_idx)
                     continue
                 
-                # 检查是否存在重复记录（根据项目名称、单位工程、成品套图、设计人）
+                # 检查是否存在重复记录（根据项目名称、单位工程、成品套图/文件名称、设计人员、设计阶段）
                 existing = ConstructionPlan.query.filter(
-                    ConstructionPlan.project_name == values[0],
-                    ConstructionPlan.unit_project == values[3],
-                    ConstructionPlan.drawing_content == values[4],
-                    ConstructionPlan.designer == values[5]
+                    ConstructionPlan.project_name == values[2],
+                    ConstructionPlan.unit_project == values[5],
+                    ConstructionPlan.drawing_content == values[6],
+                    ConstructionPlan.designer == values[7]
                 ).first()
                 
                 def parse_date(date_str):
@@ -1893,10 +1955,10 @@ def api_import_excel(table_type):
                             continue
                     return None
                 
-                plan_work_days = values[11]
-                if not plan_work_days and values[12] and values[13]:
-                    start_date = parse_date(values[12])
-                    end_date = parse_date(values[13])
+                plan_work_days = values[14]
+                if not plan_work_days and values[15] and values[16]:
+                    start_date = parse_date(values[15])
+                    end_date = parse_date(values[16])
                     if start_date and end_date:
                         plan_work_days = (end_date - start_date).days
                     else:
@@ -1910,65 +1972,74 @@ def api_import_excel(table_type):
                 if existing:
                     if overwrite:
                         # 覆盖更新
-                        existing.project_manager = values[2]
-                        existing.unit_project = values[3]
-                        existing.drawing_content = values[4]
-                        existing.designer = values[5]
-                        existing.major = values[6]
-                        existing.major_director = values[7]
-                        existing.estimated_quantitative = values[8]
-                        existing.a1_drawing_count = values[9]
-                        existing.plan_completion_percent = values[10]
+                        existing.month = values[0]
+                        existing.department = values[1]
+                        existing.project_name = values[2]
+                        existing.project_manager = values[3]
+                        existing.design_phase = values[4]
+                        existing.unit_project = values[5]
+                        existing.drawing_content = values[6]
+                        existing.designer = values[7]
+                        existing.major = values[8]
+                        existing.major_director = values[9]
+                        existing.estimated_quantitative = values[10]
+                        existing.a1_drawing_count = values[11]
+                        existing.manual_page_count = values[12]
+                        existing.plan_completion_percent = values[13]
                         existing.plan_work_days = plan_work_days
-                        existing.start_date = values[12]
-                        existing.end_date = values[13]
-                        existing.monthly_deviation = values[14]
-                        existing.completion_status = values[15]
-                        existing.remarks = values[16]
+                        existing.start_date = values[15]
+                        existing.end_date = values[16]
+                        existing.monthly_deviation = values[17]
+                        existing.completion_status = values[18]
+                        existing.remarks = values[19]
                         existing.updated_at = datetime.now()
                         updated_count += 1
                     else:
                         duplicates.append({
                             'row': row_idx,
-                            'project': values[0],
-                            'unit': values[3],
-                            'drawing': values[4],
-                            'designer': values[5]
+                            'project': values[2],
+                            'unit': values[5],
+                            'drawing': values[6],
+                            'designer': values[7]
                         })
                         continue
                 else:
                     record = ConstructionPlan(
-                        project_name=values[0],
-                        project_manager=values[2],
-                        unit_project=values[3],
-                        drawing_content=values[4],
-                        designer=values[5],
-                        major=values[6],
-                        major_director=values[7],
-                        estimated_quantitative=values[8],
-                        a1_drawing_count=values[9],
-                        plan_completion_percent=values[10],
+                        month=values[0],
+                        department=values[1],
+                        project_name=values[2],
+                        project_manager=values[3],
+                        design_phase=values[4],
+                        unit_project=values[5],
+                        drawing_content=values[6],
+                        designer=values[7],
+                        major=values[8],
+                        major_director=values[9],
+                        estimated_quantitative=values[10],
+                        a1_drawing_count=values[11],
+                        manual_page_count=values[12],
+                        plan_completion_percent=values[13],
                         plan_work_days=plan_work_days,
-                        start_date=values[12],
-                        end_date=values[13],
-                        monthly_deviation=values[14],
-                        completion_status=values[15],
-                        remarks=values[16],
+                        start_date=values[15],
+                        end_date=values[16],
+                        monthly_deviation=values[17],
+                        completion_status=values[18],
+                        remarks=values[19],
                         created_by=session.get('user_id')
                     )
                     db.session.add(record)
                     success_count += 1
                     
             elif table_type == 'phase':
-                if not values[0]:
+                if not values[2]:  # 项目名称
                     fail_count += 1
                     fail_rows.append(row_idx)
                     continue
                 # 计算计划工作日（如果未提供）
-                plan_work_days = values[11]
-                if not plan_work_days and values[12] and values[13]:
-                    start_date = parse_date(values[12])
-                    end_date = parse_date(values[13])
+                plan_work_days = values[13]
+                if not plan_work_days and values[14] and values[15]:
+                    start_date = parse_date(values[14])
+                    end_date = parse_date(values[15])
                     if start_date and end_date:
                         plan_work_days = (end_date - start_date).days
                     else:
@@ -1979,37 +2050,39 @@ def api_import_excel(table_type):
                     except:
                         plan_work_days = None
                 record = PhasePlan(
-                    project_name=values[0],
-                    project_manager=values[1],
-                    design_phase=values[2],
-                    product_drawing_name=values[3],
-                    designer=values[4],
-                    major=values[5],
-                    major_director=values[6],
-                    estimated_quantitative=values[7],
-                    a1_drawing_count=values[8],
-                    manual_page_count=values[9],
-                    plan_completion_percent=values[10],
+                    month=values[0],
+                    department=values[1],
+                    project_name=values[2],
+                    project_manager=values[3],
+                    design_phase=values[4],
+                    product_drawing_name=values[5],
+                    designer=values[6],
+                    major=values[7],
+                    major_director=values[8],
+                    estimated_quantitative=values[9],
+                    a1_drawing_count=values[10],
+                    manual_page_count=values[11],
+                    plan_completion_percent=values[12],
                     plan_work_days=plan_work_days,
-                    plan_start_date=values[12],
-                    plan_end_date=values[13],
-                    monthly_deviation=values[14],
-                    remarks=values[15],
+                    start_date=values[14],
+                    end_date=values[15],
+                    monthly_deviation=values[16],
+                    remarks=values[17],
                     created_by=session.get('user_id')
                 )
                 db.session.add(record)
                 success_count += 1
                 
             elif table_type == 'technical':
-                if not values[3]:
+                if not values[5]:  # 成品套图/文件名称
                     fail_count += 1
                     fail_rows.append(row_idx)
                     continue
                 # 计算计划工作日（如果未提供）
-                plan_work_days = values[11]
-                if not plan_work_days and values[12] and values[13]:
-                    start_date = parse_date(values[12])
-                    end_date = parse_date(values[13])
+                plan_work_days = values[13]
+                if not plan_work_days and values[14] and values[15]:
+                    start_date = parse_date(values[14])
+                    end_date = parse_date(values[15])
                     if start_date and end_date:
                         plan_work_days = (end_date - start_date).days
                     else:
@@ -2020,22 +2093,24 @@ def api_import_excel(table_type):
                     except:
                         plan_work_days = None
                 record = TechnicalPlan(
-                    project_name=values[0],
-                    project_manager=values[1],
-                    design_phase=values[2],
-                    product_drawing_name=values[3],
-                    designer=values[4],
-                    major=values[5],
-                    major_director=values[6],
-                    estimated_quantitative=values[7],
-                    a1_drawing_count=values[8],
-                    manual_page_count=values[9],
-                    plan_completion_percent=values[10],
+                    month=values[0],
+                    department=values[1],
+                    project_name=values[2],
+                    project_manager=values[3],
+                    design_phase=values[4],
+                    product_drawing_name=values[5],
+                    designer=values[6],
+                    major=values[7],
+                    major_director=values[8],
+                    estimated_quantitative=values[9],
+                    a1_drawing_count=values[10],
+                    manual_page_count=values[11],
+                    plan_completion_percent=values[12],
                     plan_work_days=plan_work_days,
-                    plan_start_date=values[12],
-                    plan_end_date=values[13],
-                    monthly_deviation=values[14],
-                    remarks=values[15],
+                    start_date=values[14],
+                    end_date=values[15],
+                    monthly_deviation=values[16],
+                    remarks=values[17],
                     created_by=session.get('user_id')
                 )
                 db.session.add(record)
@@ -2104,7 +2179,7 @@ def api_export_excel(table_type):
         if keyword:
             query = query.filter(db.or_(
                 ConstructionPlan.project_name.contains(keyword),
-                ConstructionPlan.unit_project.contains(keyword),
+                ConstructionPlan.department.contains(keyword),
                 ConstructionPlan.drawing_content.contains(keyword),
                 ConstructionPlan.major.contains(keyword),
                 ConstructionPlan.designer.contains(keyword),
@@ -2116,12 +2191,12 @@ def api_export_excel(table_type):
             query = query.filter(ConstructionPlan.major == major)
         records = query.all()
         headers = EXCEL_HEADERS['construction']
-        # 导出列顺序：项目名称、所属单位、项目负责人、单位工程名称、成品套图、设计人、专业、专业所长、预估量化指标、折合A1图纸张数、计划完成百分比、计划工作日、计划开始时间、计划完成时间、上月滚动偏差、完成情况、备注、设计阶段
         data_rows = [[
-            r.project_name, '', r.project_manager, r.unit_project, r.drawing_content,
-            r.designer, r.major, r.major_director, r.estimated_quantitative, r.a1_drawing_count,
-            r.plan_completion_percent, r.plan_work_days if r.plan_work_days else '', r.start_date, r.end_date,
-            r.monthly_deviation, r.completion_status, r.remarks, '施工图'
+            _normalize_month(r.month) or '', r.department or '', r.project_name, r.project_manager or '', r.design_phase or '',
+            r.unit_project or '', r.drawing_content or '', r.designer or '', r.major or '', r.major_director or '',
+            r.estimated_quantitative or '', r.a1_drawing_count or '', r.manual_page_count or '',
+            r.plan_completion_percent or '', r.plan_work_days if r.plan_work_days else '',
+            r.start_date or '', r.end_date or '', r.monthly_deviation or '', r.completion_status or '', r.remarks or ''
         ] for r in records]
 
     elif table_type == 'phase':
@@ -2140,11 +2215,11 @@ def api_export_excel(table_type):
         records = query.all()
         headers = EXCEL_HEADERS['phase']
         data_rows = [[
-            r.project_name, r.project_manager, r.design_phase, r.product_drawing_name,
-            r.designer, r.major, r.major_director, r.estimated_quantitative, r.a1_drawing_count,
-            r.manual_page_count, r.plan_completion_percent,
-            r.plan_work_days if r.plan_work_days else '',
-            r.plan_start_date, r.plan_end_date, r.monthly_deviation, r.remarks
+            _normalize_month(r.month) or '', r.department or '', r.project_name, r.project_manager or '', r.design_phase or '',
+            r.product_drawing_name or '', r.designer or '', r.major or '', r.major_director or '',
+            r.estimated_quantitative or '', r.a1_drawing_count or '', r.manual_page_count or '',
+            r.plan_completion_percent or '', r.plan_work_days if r.plan_work_days else '',
+            r.start_date or '', r.end_date or '', r.monthly_deviation or '', r.remarks or ''
         ] for r in records]
 
     elif table_type == 'technical':
@@ -2161,11 +2236,11 @@ def api_export_excel(table_type):
         records = query.all()
         headers = EXCEL_HEADERS['technical']
         data_rows = [[
-            r.project_name, r.project_manager, r.design_phase, r.product_drawing_name,
-            r.designer, r.major, r.major_director, r.estimated_quantitative,
-            r.a1_drawing_count, r.manual_page_count, r.plan_completion_percent,
-            r.plan_work_days if r.plan_work_days else '',
-            r.plan_start_date, r.plan_end_date, r.monthly_deviation, r.remarks
+            _normalize_month(r.month) or '', r.department or '', r.project_name or '', r.project_manager or '', r.design_phase or '',
+            r.product_drawing_name or '', r.designer or '', r.major or '', r.major_director or '',
+            r.estimated_quantitative or '', r.a1_drawing_count or '', r.manual_page_count or '',
+            r.plan_completion_percent or '', r.plan_work_days if r.plan_work_days else '',
+            r.start_date or '', r.end_date or '', r.monthly_deviation or '', r.remarks or ''
         ] for r in records]
     else:
         data_rows = []
@@ -2230,12 +2305,12 @@ def api_stats_overview():
     if keyword:
         cq = cq.filter(db.or_(
             ConstructionPlan.project_name.contains(keyword),
-            ConstructionPlan.unit_project.contains(keyword),
+            ConstructionPlan.department.contains(keyword),
             ConstructionPlan.designer.contains(keyword),
         ))
     construction_total = cq.count()
+    construction_in_progress = cq.filter(ConstructionPlan.completion_status == '进行中').count()
     construction_completed = cq.filter(ConstructionPlan.completion_status == '已完成').count()
-    construction_ongoing = cq.filter(ConstructionPlan.completion_status == '进行中').count()
     construction_not_started = cq.filter(ConstructionPlan.completion_status == '未开始').count()
     construction_delayed = cq.filter(ConstructionPlan.completion_status == '已延期').count()
 
@@ -2252,7 +2327,8 @@ def api_stats_overview():
     tq = TechnicalPlan.query
     if keyword:
         tq = tq.filter(db.or_(
-            TechnicalPlan.equipment_name.contains(keyword),
+            TechnicalPlan.project_name.contains(keyword),
+            TechnicalPlan.product_drawing_name.contains(keyword),
             TechnicalPlan.designer.contains(keyword),
         ))
     technical_total = tq.count()
@@ -2263,7 +2339,7 @@ def api_stats_overview():
     if keyword:
         cq_all = cq_all.filter(db.or_(
             ConstructionPlan.project_name.contains(keyword),
-            ConstructionPlan.unit_project.contains(keyword),
+            ConstructionPlan.department.contains(keyword),
             ConstructionPlan.designer.contains(keyword),
         ))
     for r in cq_all.all():
@@ -2282,7 +2358,7 @@ def api_stats_overview():
             },
             'completionStatus': {
                 'labels': ['已完成', '进行中', '未开始', '已延期'],
-                'values': [construction_completed, construction_ongoing, construction_not_started, construction_delayed]
+                'values': [construction_completed, construction_in_progress, construction_not_started, construction_delayed]
             },
             'majorDistribution': {
                 'labels': list(major_stats.keys()),
@@ -2682,7 +2758,7 @@ def api_stats_filter_options():
     projects = set()
     majors = set()
     designers = set()
-    unit_projects = set()
+    departments = set()
     phases = set()
 
     for r in construction_records:
@@ -2692,18 +2768,28 @@ def api_stats_filter_options():
             majors.add(r.major)
         if r.designer:
             designers.add(r.designer)
-        if r.unit_project:
-            unit_projects.add(r.unit_project)
+        if r.department:
+            departments.add(r.department)
 
     for r in phase_records:
         if r.project_name:
             projects.add(r.project_name)
         if r.design_phase:
             phases.add(r.design_phase)
+        if r.department:
+            departments.add(r.department)
+        if r.major:
+            majors.add(r.major)
 
     for r in technical_records:
+        if r.project_name:
+            projects.add(r.project_name)
         if r.designer:
             designers.add(r.designer)
+        if r.department:
+            departments.add(r.department)
+        if r.major:
+            majors.add(r.major)
 
     return jsonify({
         'code': 200,
@@ -2711,7 +2797,7 @@ def api_stats_filter_options():
             'projects': sorted(list(projects)),
             'majors': sorted(list(majors)),
             'designers': sorted(list(designers)),
-            'unitProjects': sorted(list(unit_projects)),
+            'departments': sorted(list(departments)),
             'phases': sorted(list(phases)),
         }
     })
@@ -2968,6 +3054,11 @@ def api_get_workload():
     })
 
 
+def normalize_month(month_str):
+    """规范化月份格式（代理到_normalize_month）"""
+    return _normalize_month(month_str)
+
+
 @app.route('/api/workload', methods=['POST'])
 @login_required
 def api_add_workload():
@@ -2981,8 +3072,28 @@ def api_add_workload():
         if not data.get(field):
             return jsonify({'code': 400, 'msg': f'{field} 不能为空'}), 400
     
+    # 规范化月份格式
+    month = normalize_month(data['month'])
+    
+    # 自动计算实际工作日
+    actual_work_days = data.get('actualWorkDays')
+    work_start_date = data.get('workStartDate')
+    work_end_date = data.get('workEndDate')
+    if not actual_work_days and work_start_date and work_end_date:
+        try:
+            start = datetime.strptime(work_start_date, '%Y-%m-%d')
+            end = datetime.strptime(work_end_date, '%Y-%m-%d')
+            actual_work_days = (end - start).days
+        except:
+            actual_work_days = None
+    elif actual_work_days:
+        try:
+            actual_work_days = float(actual_work_days)
+        except:
+            actual_work_days = None
+    
     workload = WorkloadStats(
-        month=data['month'],
+        month=month,
         department=data.get('department'),
         name=data['name'],
         major=data.get('major'),
@@ -2997,9 +3108,9 @@ def api_add_workload():
         a1_drawing_count=data.get('a1DrawingCount'),
         manual_page_count=data.get('manualPageCount'),
         completion_rate=data.get('completionRate'),
-        actual_work_days=float(data['actualWorkDays']) if data.get('actualWorkDays') else None,
-        work_start_date=data.get('workStartDate'),
-        work_end_date=data.get('workEndDate'),
+        actual_work_days=actual_work_days,
+        work_start_date=work_start_date,
+        work_end_date=work_end_date,
         plan_deviation=float(data['planDeviation']) if data.get('planDeviation') else None,
         remarks=data.get('remarks'),
         created_by=session.get('user_id')
@@ -3058,16 +3169,32 @@ def api_update_workload(record_id):
         workload.manual_page_count = data['manualPageCount']
     if 'completionRate' in data:
         workload.completion_rate = data['completionRate']
-    if 'actualWorkDays' in data:
-        workload.actual_work_days = float(data['actualWorkDays']) if data['actualWorkDays'] else None
-        # 如果修改了实际工作日，重置确认状态
-        workload.confirmed = False
-        workload.confirmed_by = None
-        workload.confirmed_at = None
     if 'workStartDate' in data:
         workload.work_start_date = data['workStartDate']
     if 'workEndDate' in data:
         workload.work_end_date = data['workEndDate']
+    
+    # 自动计算实际工作日（当开始/结束时间有变更时）
+    if 'workStartDate' in data or 'workEndDate' in data:
+        if workload.work_start_date and workload.work_end_date:
+            try:
+                start = datetime.strptime(workload.work_start_date, '%Y-%m-%d')
+                end = datetime.strptime(workload.work_end_date, '%Y-%m-%d')
+                workload.actual_work_days = (end - start).days
+                workload.confirmed = False
+                workload.confirmed_by = None
+                workload.confirmed_at = None
+            except:
+                pass
+        elif 'actualWorkDays' not in data:
+            workload.actual_work_days = None
+    
+    # 手动指定实际工作日时（优先级高于自动计算）
+    if 'actualWorkDays' in data:
+        workload.actual_work_days = float(data['actualWorkDays']) if data['actualWorkDays'] else None
+        workload.confirmed = False
+        workload.confirmed_by = None
+        workload.confirmed_at = None
     if 'planDeviation' in data:
         workload.plan_deviation = float(data['planDeviation']) if data['planDeviation'] else None
     if 'remarks' in data:
@@ -3095,6 +3222,53 @@ def api_delete_workload(record_id):
     db.session.commit()
     
     return jsonify({'code': 200, 'msg': '删除成功'})
+
+
+@app.route('/api/workload/batch-confirm', methods=['POST'])
+@edit_required
+def api_batch_confirm_workload():
+    """批量确认工作量记录"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'code': 400, 'msg': '请求数据无效'}), 400
+    
+    name = data.get('name', '').strip()
+    major = data.get('major', '').strip()
+    month = data.get('month', '').strip()
+    
+    query = WorkloadStats.query.filter_by(confirmed=False)
+    
+    if name:
+        query = query.filter(WorkloadStats.name == name)
+    if major:
+        query = query.filter(WorkloadStats.major == major)
+    if month:
+        query = query.filter(WorkloadStats.month == month)
+    
+    records = query.all()
+    
+    if not records:
+        return jsonify({'code': 400, 'msg': '没有符合条件的未确认记录'}), 400
+    
+    count = 0
+    for record in records:
+        # 如果没有实际工作日但有开始/结束时间，自动计算
+        if not record.actual_work_days and record.work_start_date and record.work_end_date:
+            try:
+                start = datetime.strptime(record.work_start_date, '%Y-%m-%d')
+                end = datetime.strptime(record.work_end_date, '%Y-%m-%d')
+                record.actual_work_days = (end - start).days
+            except:
+                pass
+        
+        record.confirmed = True
+        record.confirmed_by = session.get('user_id')
+        record.confirmed_at = datetime.now()
+        count += 1
+    
+    db.session.commit()
+    
+    return jsonify({'code': 200, 'msg': f'成功确认 {count} 条记录'})
 
 
 @app.route('/api/workload/filter-options', methods=['GET'])
@@ -3437,9 +3611,23 @@ def api_import_workload():
             project_name = item['project_name']
             unique_key = build_unique_key(values, project_name)
             
+            # 自动计算实际工作日
+            actual_work_days = None
+            if values[16] and values[17]:  # 工作开始时间, 工作结束时间
+                try:
+                    from datetime import datetime as dt
+                    start = dt.strptime(values[16], '%Y-%m-%d')
+                    end = dt.strptime(values[17], '%Y-%m-%d')
+                    actual_work_days = (end - start).days
+                except:
+                    try:
+                        actual_work_days = float(values[15]) if values[15] else None
+                    except:
+                        actual_work_days = None
+            
             if unique_key in existing_records:
                 existing = existing_records[unique_key]
-                existing.month = values[0]
+                existing.month = normalize_month(values[0])
                 existing.department = values[1] if values[1] else None
                 existing.major_director = values[4] if values[4] else None
                 existing.work_content = values[6] if values[6] else None
@@ -3448,13 +3636,15 @@ def api_import_workload():
                 existing.a1_drawing_count = values[12] if values[12] else None
                 existing.manual_page_count = values[13] if values[13] else None
                 existing.completion_rate = values[14] if values[14] else None
-                existing.actual_work_days = float(values[15]) if values[15] else None
+                existing.actual_work_days = actual_work_days
                 existing.plan_deviation = float(values[18]) if values[18] else None
                 existing.remarks = values[19] if values[19] else None
+                existing.work_start_date = values[16] if values[16] else None
+                existing.work_end_date = values[17] if values[17] else None
                 update_count += 1
             else:
                 workload = WorkloadStats(
-                    month=values[0],
+                    month=normalize_month(values[0]),
                     department=values[1] if values[1] else None,
                     name=values[2],
                     major=values[3] if values[3] else None,
@@ -3469,7 +3659,7 @@ def api_import_workload():
                     a1_drawing_count=values[12] if values[12] else None,
                     manual_page_count=values[13] if values[13] else None,
                     completion_rate=values[14] if values[14] else None,
-                    actual_work_days=float(values[15]) if values[15] else None,
+                    actual_work_days=actual_work_days,
                     work_start_date=values[16] if values[16] else None,
                     work_end_date=values[17] if values[17] else None,
                     plan_deviation=float(values[18]) if values[18] else None,
@@ -3630,6 +3820,61 @@ def server_error(e):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        
+        # 数据库迁移：为construction_plans表添加新列
+        from sqlalchemy import text
+        try:
+            columns_to_add = [
+                ('month', 'VARCHAR(10)'),
+                ('department', 'VARCHAR(100)'),
+                ('design_phase', 'VARCHAR(50)'),
+                ('manual_page_count', 'VARCHAR(50)'),
+                ('unit_project', 'VARCHAR(200)'),
+                ('completion_status', 'VARCHAR(20)')
+            ]
+            for col_name, col_type in columns_to_add:
+                try:
+                    db.session.execute(text(f'ALTER TABLE construction_plans ADD COLUMN {col_name} {col_type}'))
+                    db.session.commit()
+                except:
+                    db.session.rollback()  # 列已存在，跳过
+        except Exception as e:
+            print(f'数据库迁移警告: {str(e)}')
+
+        # 为phase_plans表添加新列
+        try:
+            phase_columns = [
+                ('month', 'VARCHAR(10)'),
+                ('department', 'VARCHAR(100)'),
+                ('start_date', 'VARCHAR(20)'),
+                ('end_date', 'VARCHAR(20)')
+            ]
+            for col_name, col_type in phase_columns:
+                try:
+                    db.session.execute(text(f'ALTER TABLE phase_plans ADD COLUMN {col_name} {col_type}'))
+                    db.session.commit()
+                except:
+                    db.session.rollback()
+        except Exception as e:
+            print(f'阶段设计表迁移警告: {str(e)}')
+
+        # 为technical_plans表添加新列
+        try:
+            tech_columns = [
+                ('month', 'VARCHAR(10)'),
+                ('department', 'VARCHAR(100)'),
+                ('start_date', 'VARCHAR(20)'),
+                ('end_date', 'VARCHAR(20)')
+            ]
+            for col_name, col_type in tech_columns:
+                try:
+                    db.session.execute(text(f'ALTER TABLE technical_plans ADD COLUMN {col_name} {col_type}'))
+                    db.session.commit()
+                except:
+                    db.session.rollback()
+        except Exception as e:
+            print(f'技术要求表迁移警告: {str(e)}')
+        
         init_default_data()
     print('=' * 50)
     print('  设计项目进度管理系统 已启动')

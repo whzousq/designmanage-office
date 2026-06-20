@@ -320,6 +320,12 @@ body {
 .toolbar-left { display: flex; align-items: center; gap: 12px; }
 .toolbar-left h2 { font-size: 16px; font-weight: 600; color: var(--gray-800); padding-left: 8px; border-left: 3px solid var(--primary); }
 .toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.toolbar-right-single-line { flex-wrap: nowrap; }
+.toolbar-right-single-line .search-box { min-width: 200px; }
+.toolbar-right-single-line .btn { white-space: nowrap; flex-shrink: 0; }
+@media (max-width: 1400px) {
+  .toolbar-right-single-line { flex-wrap: wrap; }
+}
 .search-box {
   display: flex;
   align-items: center;
@@ -1174,15 +1180,19 @@ body {
             <thead id="thead-construction">
               <tr>
                 <th style="width:50px" class="td-center">序号</th>
+                <th>月份</th>
+                <th>所属单位</th>
                 <th>项目名称</th>
                 <th>项目负责人</th>
+                <th>设计阶段</th>
                 <th>单位工程名称</th>
-                <th>成品套图</th>
-                <th>设计人</th>
+                <th>成品套图/文件名称</th>
+                <th>设计人员</th>
                 <th>专业</th>
                 <th>专业所长</th>
                 <th>预估量化指标</th>
                 <th>折合A1图纸张数</th>
+                <th>说明书页数</th>
                 <th>计划完成百分比</th>
                 <th>计划工作日</th>
                 <th>计划开始时间</th>
@@ -1258,6 +1268,8 @@ body {
             <thead id="thead-phase">
               <tr>
                 <th style="width:50px" class="td-center">序号</th>
+                <th>月份</th>
+                <th>所属单位</th>
                 <th>项目名称</th>
                 <th>项目负责人</th>
                 <th>设计阶段</th>
@@ -1346,6 +1358,8 @@ body {
             <thead id="thead-technical">
               <tr>
                 <th style="width:50px" class="td-center">序号</th>
+                <th>月份</th>
+                <th>所属单位</th>
                 <th>项目名称</th>
                 <th>项目负责人</th>
                 <th>设计阶段</th>
@@ -1376,7 +1390,7 @@ body {
     <div id="tab-workload" class="tab-content">
       <div class="table-toolbar">
         <div class="toolbar-left"><h2>工作量统计</h2></div>
-        <div class="toolbar-right">
+        <div class="toolbar-right toolbar-right-single-line">
           <div class="search-box">
             <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
             <input type="text" id="search-workload" placeholder="搜索项目...">
@@ -1384,8 +1398,39 @@ body {
           <button class="btn btn-sm btn-warning" id="btn-import-workload">导入Excel</button>
           <input type="file" id="file-import-workload" class="hidden-input" accept=".xlsx,.xls">
           <button class="btn btn-sm btn-outline" id="btn-export-excel-workload">导出Excel</button>
+          <button class="btn btn-sm btn-success" id="btn-batch-confirm-workload" style="background:linear-gradient(135deg,#38a169 0%,#276749 100%);color:#fff !important;font-weight:600;">批量确认</button>
           <button class="btn btn-sm btn-danger" id="btn-batch-delete-workload">批量删除</button>
           <button class="btn btn-sm btn-success" id="btn-add-workload">+ 新增记录</button>
+        </div>
+      </div>
+      <!-- 批量确认筛选面板 -->
+      <div id="batch-confirm-panel-workload" class="table-container" style="display:none;margin-bottom:16px;">
+        <div style="padding:16px;border-bottom:1px solid var(--gray-200);">
+          <div style="font-weight:600;font-size:15px;color:var(--gray-800);margin-bottom:12px;">批量确认工作量</div>
+          <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:13px;font-weight:600;color:var(--gray-700);">姓名</label>
+              <div class="autocomplete-wrapper" style="position:relative;">
+                <input type="text" id="bc-workload-name" class="bd-input" list="datalist-bc-workload-name" style="width:150px;" placeholder="输入或选择...">
+                <datalist id="datalist-bc-workload-name"></datalist>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:13px;font-weight:600;color:var(--gray-700);">专业</label>
+              <div class="autocomplete-wrapper" style="position:relative;">
+                <input type="text" id="bc-workload-major" class="bd-input" list="datalist-bc-workload-major" style="width:120px;" placeholder="输入或选择...">
+                <datalist id="datalist-bc-workload-major"></datalist>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:13px;font-weight:600;color:var(--gray-700);">月份</label>
+              <input type="month" id="bc-workload-month" class="bd-input" style="width:150px;">
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+            <button class="btn btn-sm btn-outline" onclick="resetBCPanel('workload')">重置</button>
+            <button class="btn btn-sm btn-primary" onclick="executeBatchConfirm()">执行确认</button>
+          </div>
         </div>
       </div>
       <!-- 批量删除筛选面板 -->
@@ -1816,15 +1861,19 @@ var TABLE_CONFIG = {
     templateApi: '/api/template/construction',
     exportExcelApi: '/api/export-excel/construction',
     columns: [
+      { key: 'month', label: '月份', type: 'text' },
+      { key: 'department', label: '所属单位', type: 'text' },
       { key: 'projectName', label: '项目名称', type: 'text', required: true },
       { key: 'projectManager', label: '项目负责人', type: 'text' },
+      { key: 'designPhase', label: '设计阶段', type: 'select', options: ['方案设计', '初步设计', '施工图设计', '竣工图', '其他'] },
       { key: 'unitProject', label: '单位工程名称', type: 'text' },
-      { key: 'drawingContent', label: '成品套图', type: 'text' },
-      { key: 'designer', label: '设计人', type: 'designer' },
+      { key: 'drawingContent', label: '成品套图/文件名称', type: 'text' },
+      { key: 'designer', label: '设计人员', type: 'designer' },
       { key: 'major', label: '专业', type: 'select', options: ['建筑', '结构', '给排水', '暖通', '电气', '总图', '动力', '通信', '其他'] },
       { key: 'majorDirector', label: '专业所长', type: 'text' },
       { key: 'estimatedQuantitative', label: '预估量化指标', type: 'text' },
       { key: 'a1DrawingCount', label: '折合A1图纸张数', type: 'text' },
+      { key: 'manualPageCount', label: '说明书页数', type: 'text' },
       { key: 'planCompletionPercent', label: '计划完成百分比', type: 'text' },
       { key: 'planWorkDays', label: '计划工作日', type: 'number' },
       { key: 'startDate', label: '计划开始时间', type: 'date' },
@@ -1841,6 +1890,8 @@ var TABLE_CONFIG = {
     templateApi: '/api/template/phase',
     exportExcelApi: '/api/export-excel/phase',
     columns: [
+      { key: 'month', label: '月份', type: 'text' },
+      { key: 'department', label: '所属单位', type: 'text' },
       { key: 'projectName', label: '项目名称', type: 'text', required: true },
       { key: 'projectManager', label: '项目负责人', type: 'text' },
       { key: 'designPhase', label: '设计阶段', type: 'select', options: ['方案设计', '初步设计', '施工图设计', '竣工图', '其他'] },
@@ -1853,8 +1904,8 @@ var TABLE_CONFIG = {
       { key: 'manualPageCount', label: '说明书页数', type: 'text' },
       { key: 'planCompletionPercent', label: '计划完成百分比', type: 'text' },
       { key: 'planWorkDays', label: '计划工作日', type: 'number' },
-      { key: 'planStartDate', label: '计划开始时间', type: 'date' },
-      { key: 'planEndDate', label: '计划完成时间', type: 'date' },
+      { key: 'startDate', label: '计划开始时间', type: 'date' },
+      { key: 'endDate', label: '计划完成时间', type: 'date' },
       { key: 'monthlyDeviation', label: '上月滚动偏差', type: 'text' },
       { key: 'remarks', label: '备注', type: 'text' }
     ]
@@ -1866,7 +1917,9 @@ var TABLE_CONFIG = {
     templateApi: '/api/template/technical',
     exportExcelApi: '/api/export-excel/technical',
     columns: [
-      { key: 'projectName', label: '项目名称', type: 'text', required: true },
+      { key: 'month', label: '月份', type: 'text' },
+      { key: 'department', label: '所属单位', type: 'text' },
+      { key: 'projectName', label: '项目名称', type: 'text' },
       { key: 'projectManager', label: '项目负责人', type: 'text' },
       { key: 'designPhase', label: '设计阶段', type: 'select', options: ['方案设计', '初步设计', '施工图设计', '竣工图', '其他'] },
       { key: 'productDrawingName', label: '成品套图/文件名称', type: 'text', required: true },
@@ -1878,8 +1931,8 @@ var TABLE_CONFIG = {
       { key: 'manualPageCount', label: '说明书页数', type: 'text' },
       { key: 'planCompletionPercent', label: '计划完成百分比', type: 'text' },
       { key: 'planWorkDays', label: '计划工作日', type: 'number' },
-      { key: 'planStartDate', label: '计划开始时间', type: 'date' },
-      { key: 'planEndDate', label: '计划完成时间', type: 'date' },
+      { key: 'startDate', label: '计划开始时间', type: 'date' },
+      { key: 'endDate', label: '计划完成时间', type: 'date' },
       { key: 'monthlyDeviation', label: '上月滚动偏差', type: 'text' },
       { key: 'remarks', label: '备注', type: 'text' }
     ]
@@ -3580,7 +3633,7 @@ function deleteProjectName(projectNameId) {
 
 // ==================== STATISTICS ====================
 var currentAnalysis = 'major';
-var filterOptions = { projects: [], majors: [], designers: [], unitProjects: [] };
+var filterOptions = { projects: [], majors: [], designers: [] };
 
 async function loadStats() {
   try {
@@ -3763,8 +3816,8 @@ function renderAnalysisFilters() {
     html += '<div class="form-group"><label>项目名称（必选）</label><select id="af-project"><option value="">全部项目</option>';
     filterOptions.projects.forEach(function(p) { html += '<option value="' + p + '">' + p + '</option>'; });
     html += '</select></div>';
-    html += '<div class="form-group"><label>单位工程名称（可选）</label><select id="af-unit"><option value="">全部</option>';
-    filterOptions.unitProjects.forEach(function(u) { html += '<option value="' + u + '">' + u + '</option>'; });
+    html += '<div class="form-group"><label>所属单位（可选）</label><select id="af-unit"><option value="">全部</option>';
+    filterOptions.departments.forEach(function(u) { html += '<option value="' + u + '">' + u + '</option>'; });
     html += '</select></div>';
     html += '<div class="form-group"><label>专业（可选）</label><select id="af-major"><option value="">全部专业</option>';
     filterOptions.majors.forEach(function(m) { html += '<option value="' + m + '">' + m + '</option>'; });
@@ -3788,7 +3841,7 @@ function getAnalysisParams() {
   var designer = document.getElementById('af-designer');
   if (designer) params.designer = designer.value;
   var unit = document.getElementById('af-unit');
-  if (unit) params.unit_project = unit.value;
+  if (unit) params.department = unit.value;
   var start = document.getElementById('af-start');
   if (start) params.start_date = start.value;
   var end = document.getElementById('af-end');
@@ -3987,12 +4040,15 @@ document.querySelectorAll('.sidebar-link[data-tab]').forEach(function(link) {
 });
 
 // Search with debounce for data tables
-['construction', 'phase', 'technical'].forEach(function(table) {
-  document.getElementById('search-' + table).addEventListener('input', function() {
-    var t = table;
-    clearTimeout(searchTimers[t]);
-    searchTimers[t] = setTimeout(function() { loadTable(t); }, 300);
-  });
+['construction', 'phase', 'technical', 'workload'].forEach(function(table) {
+  var searchEl = document.getElementById('search-' + table);
+  if (searchEl) {
+    searchEl.addEventListener('input', function() {
+      var t = table;
+      clearTimeout(searchTimers[t]);
+      searchTimers[t] = setTimeout(function() { loadTable(t); }, 300);
+    });
+  }
 });
 
 // Search for designers
@@ -4344,7 +4400,7 @@ async function loadBDUnits(table) {
   
   var result = await api('GET', '/api/stats/filter-options');
   if (result && result.code === 200) {
-    var units = result.data.unitProjects || [];
+    var units = result.data.departments || [];
     var html = '<option value="">全部</option>';
     units.forEach(function(u) {
       html += '<option value="' + escapeHtml(u) + '">' + escapeHtml(u) + '</option>';
@@ -4591,6 +4647,103 @@ document.getElementById('btn-bd-reset-technical').addEventListener('click', func
   if (btn) btn.addEventListener('click', function() { executeBatchDelete('technical'); });
 })();
 
+// Workload batch confirm
+document.getElementById('btn-batch-confirm-workload').addEventListener('click', function() {
+  if (currentUser && ROLES[currentUser.role].canEdit) {
+    toggleBatchConfirmPanel('workload');
+  } else {
+    showToast('您没有确认权限', 'error');
+  }
+});
+
+function toggleBatchConfirmPanel(table) {
+  var panel = document.getElementById('batch-confirm-panel-' + table);
+  if (panel.style.display === 'none' || panel.style.display === '') {
+    panel.style.display = 'block';
+    loadBCOptions(table);
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function loadBCOptions(table) {
+  if (table === 'workload') {
+    // Load names
+    var nameInput = document.getElementById('bc-workload-name');
+    var nameDatalist = document.getElementById('datalist-bc-workload-name');
+    if (nameDatalist) {
+      nameDatalist.innerHTML = '';
+      var names = tableRawData[table] ? tableRawData[table].map(function(r) { return r.name; }).filter(function(n) { return n; }) : [];
+      var uniqueNames = Array.from(new Set(names));
+      uniqueNames.forEach(function(n) {
+        var opt = document.createElement('option');
+        opt.value = n;
+        nameDatalist.appendChild(opt);
+      });
+    }
+    // Load majors
+    var majorInput = document.getElementById('bc-workload-major');
+    var majorDatalist = document.getElementById('datalist-bc-workload-major');
+    if (majorDatalist) {
+      majorDatalist.innerHTML = '';
+      var majors = tableRawData[table] ? tableRawData[table].map(function(r) { return r.major; }).filter(function(m) { return m; }) : [];
+      var uniqueMajors = Array.from(new Set(majors));
+      uniqueMajors.forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m;
+        majorDatalist.appendChild(opt);
+      });
+    }
+  }
+}
+
+function resetBCPanel(table) {
+  if (table === 'workload') {
+    var nameInput = document.getElementById('bc-workload-name');
+    var majorInput = document.getElementById('bc-workload-major');
+    var monthInput = document.getElementById('bc-workload-month');
+    if (nameInput) nameInput.value = '';
+    if (majorInput) majorInput.value = '';
+    if (monthInput) monthInput.value = '';
+  }
+}
+
+async function executeBatchConfirm() {
+  var name = document.getElementById('bc-workload-name').value.trim();
+  var major = document.getElementById('bc-workload-major').value.trim();
+  var month = document.getElementById('bc-workload-month').value.trim();
+  
+  if (!name && !major && !month) {
+    showToast('请至少填写一个筛选条件', 'error');
+    return;
+  }
+  
+  // Build summary
+  var summary = '确认条件：';
+  if (name) summary += '姓名=' + name + '；';
+  if (major) summary += '专业=' + major + '；';
+  if (month) summary += '月份=' + month + '；';
+  
+  if (!confirm(summary + '\n\n确定执行批量确认吗？')) return;
+  
+  showLoading();
+  var result = await api('POST', '/api/workload/batch-confirm', {
+    name: name,
+    major: major,
+    month: month
+  });
+  hideLoading();
+  
+  if (result && result.code === 200) {
+    showToast(result.msg, 'success');
+    resetBCPanel('workload');
+    document.getElementById('batch-confirm-panel-workload').style.display = 'none';
+    loadTable('workload');
+  } else {
+    showToast((result && result.msg) || '批量确认失败', 'error');
+  }
+}
+
 // Workload batch delete
 document.getElementById('btn-batch-delete-workload').addEventListener('click', function() {
   if (currentUser && ROLES[currentUser.role].canEdit) {
@@ -4640,10 +4793,12 @@ function openBatchAddModal(table) {
   
   if (table === 'construction') {
     html += '<div class="form-group"><label>项目名称 <span style="color:#e74c3c">*</span></label><input type="text" id="batchAddProjectName" class="bd-input" placeholder="请输入项目名称"></div>';
-    html += '<div class="form-group"><label>单位工程名称 <span style="color:#e74c3c">*</span></label><input type="text" id="batchAddUnitProject" class="bd-input" placeholder="请输入单位工程名称"></div>';
-    html += '<div class="form-group"><label>成品套图</label><input type="text" id="batchAddDrawingContent" class="bd-input" placeholder="请输入图纸内容"></div>';
+    html += '<div class="form-group"><label>所属单位</label><input type="text" id="batchAddDepartment" class="bd-input" placeholder="请输入所属单位"></div>';
+    html += '<div class="form-group"><label>设计阶段</label><select id="batchAddDesignPhase" class="bd-input"><option value="">请选择</option><option value="方案设计">方案设计</option><option value="初步设计">初步设计</option><option value="施工图设计">施工图设计</option><option value="竣工图">竣工图</option><option value="其他">其他</option></select></div>';
+    html += '<div class="form-group"><label>单位工程名称</label><input type="text" id="batchAddUnitProject" class="bd-input" placeholder="请输入单位工程名称"></div>';
+    html += '<div class="form-group"><label>成品套图/文件名称</label><input type="text" id="batchAddDrawingContent" class="bd-input" placeholder="请输入图纸内容"></div>';
     html += '<div class="form-group"><label>专业</label><select id="batchAddMajorCategory" class="bd-input"><option value="">请选择</option><option value="建筑">建筑</option><option value="结构">结构</option><option value="给排水">给排水</option><option value="暖通">暖通</option><option value="电气">电气</option><option value="总图">总图</option><option value="动力">动力</option><option value="通信">通信</option></select></div>';
-    html += '<div class="form-group"><label>设计人</label><select id="batchAddDesigner" class="bd-input"><option value="">请选择</option></select></div>';
+    html += '<div class="form-group"><label>设计人员</label><select id="batchAddDesigner" class="bd-input"><option value="">请选择</option></select></div>';
   }
   
   document.getElementById('batchAddBody').innerHTML = html;
@@ -4665,12 +4820,14 @@ async function executeBatchAdd() {
   
   if (currentBatchAddTable === 'construction') {
     var projectName = document.getElementById('batchAddProjectName').value.trim();
-    var unitProject = document.getElementById('batchAddUnitProject').value.trim();
-    if (!projectName || !unitProject) {
-      showToast('请填写必填项：项目名称和单位工程名称', 'error');
+    var department = document.getElementById('batchAddDepartment').value.trim();
+    if (!projectName) {
+      showToast('请填写必填项：项目名称', 'error');
       return;
     }
     
+    var designPhase = document.getElementById('batchAddDesignPhase').value;
+    var unitProject = document.getElementById('batchAddUnitProject').value.trim();
     var drawingContent = document.getElementById('batchAddDrawingContent').value.trim();
     var major = document.getElementById('batchAddMajorCategory').value;
     var designer = document.getElementById('batchAddDesigner').value;
@@ -4682,11 +4839,12 @@ async function executeBatchAdd() {
     for (var i = 0; i < count; i++) {
       var result = await api('POST', '/api/construction', {
         projectName: projectName,
+        department: department,
+        designPhase: designPhase,
         unitProject: unitProject,
         drawingContent: drawingContent,
         major: major,
-        designer: designer,
-        completionStatus: '未开始'
+        designer: designer
       });
       if (result && result.code === 200) {
         successCount++;
